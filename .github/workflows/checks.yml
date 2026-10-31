@@ -1,0 +1,35 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install Poetry
+        run: pipx install --python python poetry==2.4.1
+
+      - name: Install dependencies
+        run: |
+          poetry env use python
+          poetry install --no-interaction
+
+      - name: Run checks
+        run: ./check.sh
