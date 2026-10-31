@@ -1,0 +1,24 @@
+name: relay
+
+services:
+  postgres:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: ${RELAY_DB_NAME:?RELAY_DB_NAME is required}
+      POSTGRES_USER: ${RELAY_DB_USER:?RELAY_DB_USER is required}
+      POSTGRES_PASSWORD: ${RELAY_DB_PASSWORD:?RELAY_DB_PASSWORD is required}
+    ports:
+      - "127.0.0.1:${RELAY_DB_PORT:?RELAY_DB_PORT is required}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:

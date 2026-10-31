@@ -32,3 +32,18 @@ Run `./check.sh` from the project directory.
 
 This runs Poetry validation, Ruff linting and formatting checks,
 Pyright strict type checking, and pytest.
+
+## Local database
+
+On first setup, copy `.env.example` to `.env`.
+
+Start PostgreSQL with:
+
+`docker compose -p relay -f compose.yaml --env-file .env up -d --wait --wait-timeout 120 postgres`
+
+Check its status with:
+
+`docker compose -p relay -f compose.yaml --env-file .env ps`
+
+The local database is available at `127.0.0.1:55432`.
+Its data is stored in the `relay_postgres_data` Docker volume.
