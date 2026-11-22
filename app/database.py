@@ -18,14 +18,18 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
             await engine.dispose()
 
 
+def create_database_engine() -> AsyncEngine:
+    settings = Settings.model_validate({})
+    return create_async_engine(
+        settings.database_url,
+        connect_args={"connect_timeout": 5},
+        hide_parameters=True,
+    )
+
+
 def get_database_engine(application: FastAPI) -> AsyncEngine:
     engine: AsyncEngine | None = application.state.event_engine
     if engine is None:
-        settings = Settings.model_validate({})
-        engine = create_async_engine(
-            settings.database_url,
-            connect_args={"connect_timeout": 5},
-            hide_parameters=True,
-        )
+        engine = create_database_engine()
         application.state.event_engine = engine
     return engine
