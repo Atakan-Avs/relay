@@ -950,6 +950,18 @@ files = [
 ]
 
 [[package]]
+name = "sql-infer"
+version = "0.17.5"
+description = "SQL Infer Python Wrapper"
+optional = false
+python-versions = "<4.0,>=3.12"
+groups = ["dev"]
+files = [
+    {file = "sql_infer-0.17.5-py3-none-any.whl", hash = "sha256:e75e8bc24079f46b0fde2e704335153ca12a9072a3c05f9caad8af4e75203291"},
+    {file = "sql_infer-0.17.5.tar.gz", hash = "sha256:88c88cddb260e30e196070011ede96c89f57bca00ab6c85854394a2b19ef8649"},
+]
+
+[[package]]
 name = "sqlalchemy"
 version = "2.1.6"
 description = "Database Abstraction Library"
@@ -1156,4 +1168,4 @@ standard = ["httptools (>=0.8.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<3.15"
-content-hash = "83b14ec227a06a3be99ef13cac840a1e9bd2305768476611a69be7c22e9da956"
+content-hash = "c0010a57afca2605d56fa274d970955a1833fbe5bbe2b872376a6b8e840f5f78"
