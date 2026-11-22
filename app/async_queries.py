@@ -39,9 +39,15 @@ async def insert_event(
     payload: str | None,
 ) -> None:
     await conn.execute(
-        text("""INSERT INTO events (event_id, event_type, occurred_at, payload)
-VALUES (:event_id, :event_type, :occurred_at, :payload)
-ON CONFLICT (event_id) DO NOTHING;
+        text("""WITH new_event AS (
+    INSERT INTO events (event_id, event_type, occurred_at, payload)
+    VALUES (:event_id, :event_type, :occurred_at, :payload)
+    ON CONFLICT (event_id) DO NOTHING
+    RETURNING event_id
+)
+INSERT INTO event_deliveries (event_id, destination)
+SELECT event_id, 'webhook'
+FROM new_event;
 """),
         {
             "event_id": event_id,
