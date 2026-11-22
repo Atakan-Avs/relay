@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A server-side event collector and delivery gateway."
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
-dependencies = ["fastapi (>=0.162.0,<0.163.0)", "uvicorn (>=0.54.0,<0.55.0)", "sqlalchemy[asyncio] (>=2.1.6,<3.0.0)", "psycopg[binary] (>=3.3.6,<4.0.0)", "alembic (>=1.20.1,<2.0.0)", "pydantic-settings (>=2.16.2,<3.0.0)"]
+dependencies = ["fastapi (>=0.162.0,<0.163.0)", "uvicorn (>=0.54.0,<0.55.0)", "sqlalchemy[asyncio] (>=2.1.6,<3.0.0)", "psycopg[binary] (>=3.3.6,<4.0.0)", "alembic (>=1.20.1,<2.0.0)", "pydantic-settings (>=2.16.2,<3.0.0)", "httpx2 (>=2.16.0,<3.0.0)"]
 
 [tool.poetry]
 package-mode = false
@@ -14,7 +14,6 @@ dev = [
     "ruff (>=0.17.3,<0.18.0)",
     "pyright (>=1.1.414,<2.0.0)",
     "pytest (>=9.2.0,<10.0.0)",
-    "httpx2 (>=2.16.0,<3.0.0)",
     "sql-infer (==0.17.5)"
 ]
 
