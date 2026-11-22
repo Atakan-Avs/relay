@@ -1,0 +1,8 @@
+path = ["queries"]
+target = "app/async_queries.py"
+
+[mode.sql-alchemy-v2]
+async = true
+type-gen = "python"
+argument-mode = "keyword"
+generic-param-types = true
