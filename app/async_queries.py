@@ -32,6 +32,7 @@ class DbOutput[T]:
 
 @dataclass
 class ClaimWebhookDeliveryOutput:
+    status: str | None
     event_id: Any | None
     attempt_count: int | None
     event_type: str | None
@@ -40,11 +41,11 @@ class ClaimWebhookDeliveryOutput:
 
 
 async def claim_webhook_delivery(
-    conn: AsyncConnection,
+    conn: AsyncConnection, *, max_attempts: int | None
 ) -> DbOutput[ClaimWebhookDeliveryOutput]:
     result = await conn.execute(
         text("""WITH candidate AS (
-    SELECT event_id, destination
+    SELECT event_id, destination, attempt_count >= :max_attempts AS exhausted
     FROM event_deliveries
     WHERE destination = 'webhook'
         AND status = 'pending'
@@ -55,19 +56,25 @@ async def claim_webhook_delivery(
 )
 UPDATE event_deliveries AS delivery
 SET
-    attempt_count = delivery.attempt_count + 1,
-    next_attempt_at = CURRENT_TIMESTAMP + INTERVAL '30 seconds'
+    status = CASE WHEN candidate.exhausted THEN 'failed' ELSE 'pending' END,
+    attempt_count = delivery.attempt_count + CASE WHEN candidate.exhausted THEN 0 ELSE 1 END,
+    next_attempt_at = CASE
+        WHEN candidate.exhausted THEN NULL
+        ELSE CURRENT_TIMESTAMP + INTERVAL '30 seconds'
+    END
 FROM candidate
 JOIN events AS event USING (event_id)
 WHERE delivery.event_id = candidate.event_id
     AND delivery.destination = candidate.destination
 RETURNING
+    delivery.status,
     delivery.event_id,
     delivery.attempt_count,
     event.event_type,
     event.occurred_at,
     event.payload;
 """),
+        {"max_attempts": max_attempts},
     )
     return DbOutput(ClaimWebhookDeliveryOutput(*row) for row in result)  # type: ignore
 
@@ -120,3 +127,35 @@ RETURNING event_id;
         {"event_id": event_id, "attempt_count": attempt_count},
     )
     return DbOutput(MarkWebhookDeliveredOutput(*row) for row in result)  # type: ignore
+
+
+@dataclass
+class RecordWebhookFailureOutput:
+    status: str | None
+
+
+async def record_webhook_failure(
+    conn: AsyncConnection,
+    *,
+    retry_seconds: int | None,
+    event_id: Any | None,
+    attempt_count: int | None,
+) -> DbOutput[RecordWebhookFailureOutput]:
+    result = await conn.execute(
+        text("""UPDATE event_deliveries
+SET
+    status = CASE WHEN CAST(:retry_seconds AS integer) IS NULL THEN 'failed' ELSE 'pending' END,
+    next_attempt_at = CURRENT_TIMESTAMP + CAST(:retry_seconds AS integer) * INTERVAL '1 second'
+WHERE event_id = :event_id
+    AND destination = 'webhook'
+    AND status = 'pending'
+    AND attempt_count = :attempt_count
+RETURNING status;
+"""),
+        {
+            "retry_seconds": retry_seconds,
+            "event_id": event_id,
+            "attempt_count": attempt_count,
+        },
+    )
+    return DbOutput(RecordWebhookFailureOutput(*row) for row in result)  # type: ignore
