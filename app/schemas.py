@@ -1,4 +1,5 @@
 from math import isfinite
+from typing import Literal
 from uuid import UUID
 
 from pydantic import (
@@ -39,3 +40,13 @@ class EventCreate(BaseModel):
         if _contains_non_finite_number(payload):
             raise ValueError("Payload numbers must be finite")
         return payload
+
+
+class EventSummary(BaseModel):
+    event_id: UUID
+    event_type: str
+    occurred_at: AwareDatetime
+    received_at: AwareDatetime
+    delivery_status: Literal["pending", "delivered", "failed"] | None
+    attempt_count: int | None
+    next_attempt_at: AwareDatetime | None

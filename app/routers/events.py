@@ -1,10 +1,11 @@
 from json import dumps
+from typing import Annotated
 
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, Query, Request, Response, status
 
-from app.async_queries import insert_event
+from app.async_queries import insert_event, list_recent_events
 from app.database import get_database_engine
-from app.schemas import EventCreate
+from app.schemas import EventCreate, EventSummary
 
 router = APIRouter(prefix="/v1")
 
@@ -24,3 +25,17 @@ async def collect(event: EventCreate, request: Request) -> Response:
         )
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/events")
+async def list_events(
+    request: Request,
+    limit: Annotated[int, Query(ge=1, le=100)] = 25,
+) -> list[EventSummary]:
+    engine = get_database_engine(request.app)
+    async with engine.connect() as connection:
+        result = await list_recent_events(connection, limit=limit)
+        return [
+            EventSummary.model_validate(row, from_attributes=True)
+            for row in result.all()
+        ]

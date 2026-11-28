@@ -108,6 +108,41 @@ FROM new_event;
 
 
 @dataclass
+class ListRecentEventsOutput:
+    event_id: Any | None
+    event_type: str | None
+    occurred_at: datetime | None
+    received_at: datetime | None
+    delivery_status: str | None
+    attempt_count: int | None
+    next_attempt_at: datetime | None
+
+
+async def list_recent_events(
+    conn: AsyncConnection, *, limit: int | None
+) -> DbOutput[ListRecentEventsOutput]:
+    result = await conn.execute(
+        text("""SELECT
+    event.event_id,
+    event.event_type,
+    event.occurred_at,
+    event.received_at,
+    delivery.status AS delivery_status,
+    delivery.attempt_count,
+    delivery.next_attempt_at
+FROM events AS event
+LEFT JOIN event_deliveries AS delivery
+    ON delivery.event_id = event.event_id
+    AND delivery.destination = 'webhook'
+ORDER BY event.received_at DESC, event.event_id DESC
+LIMIT :limit;
+"""),
+        {"limit": limit},
+    )
+    return DbOutput(ListRecentEventsOutput(*row) for row in result)  # type: ignore
+
+
+@dataclass
 class MarkWebhookDeliveredOutput:
     event_id: Any | None
 
