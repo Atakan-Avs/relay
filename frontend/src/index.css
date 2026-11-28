@@ -1,0 +1,52 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #182230;
+  background: #f4f6f9;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+h1 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #dce2ea;
+  border-radius: 0.75rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.8rem 1rem;
+  white-space: nowrap;
+}
+
+th {
+  background: #edf1f6;
+}
+
+td {
+  border-top: 1px solid #e7ebf0;
+}
+
+[data-status='pending'] { color: #854d0e; }
+[data-status='delivered'] { color: #166534; }
+[data-status='failed'],
+[role='alert'] { color: #b91c1c; }
